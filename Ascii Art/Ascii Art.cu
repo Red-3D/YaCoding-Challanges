@@ -1,8 +1,6 @@
-#include<vector>
+#include<string>
 #include<fstream>
-#include<stdio.h>
 #include<iostream>
-#include<filesystem>
 #include"Reds_var_defs.hpp"
 
 #include<cuda_runtime.h>
@@ -10,6 +8,36 @@
 
 #define fread(a, size) read((char*)&a, size)
 #define threads 256
+
+// /-------------------------------------------------------------------------\
+// | Author: Red_3D                                                          |
+// | Date:  12.10.2020                                                       |
+// |                                                                         |
+// | This is free and unencumbered software released into the public domain. |
+// |                                                                         |
+// | Anyone is free to copy, modify, publish, use, compile, sell, or         |
+// | distribute this software, either in source code form or as a compiled   |
+// | binary, for any purpose, commercial or non-commercial, and by any       |
+// | means.                                                                  |
+// |                                                                         |
+// | In jurisdictions that recognize copyright laws, the author or authors   |
+// | of this software dedicate any and all copyright interest in the         |
+// | software to the public domain. We make this dedication for the benefit  |
+// | of the public at large and to the detriment of our heirs and            |
+// | successors. We intend this dedication to be an overt act of             |
+// | relinquishment in perpetuity of all present and future rights to this   |
+// | software under copyright law.                                           |
+// |                                                                         |
+// | THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,         |
+// | EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF      |
+// | MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  |
+// | IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR       |
+// | OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,   |
+// | ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR   |
+// | OTHER DEALINGS IN THE SOFTWARE.                                         |
+// |                                                                         |
+// | For more information, please refer to <http://unlicense.org/>           |
+// \-------------------------------------------------------------------------/
 
 __global__ void process_image(u64 size, u16 char_amount, char* chars, float* density_map, u8 *img, char *output) {
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -62,11 +90,12 @@ int main() {
 	//	/-----------------\
 	//	| filestream shit |
 	//	\-----------------/
+	std::cout << " image path: ";
+	std::string path;
+	std::getline(std::cin, path);
+	path.erase(std::remove(path.begin(), path.end(), '"'), path.end());
 
-	std::string path = "D:\\CPP\\C++ Projects\\YaCoding\\Ascii_Art\\images\\HD_Bobby.ppm";
-
-
-	std::ifstream file(path, std::ios::in | std::ios::binary);
+	std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
 	if (!file.is_open()) {
 		std::cout << "ERR[101] could not open: " << path.c_str() << "\n\n";
 		exit(101);
@@ -134,14 +163,14 @@ int main() {
 	u8* image = new u8[height * width * 3];
 	file.read((char*)image, (height * width) * 3);
 
-	//	/----------------------------------------------------------\
-	//	|                      Character set                       |
-	//	| duck users and their need to controll stuff, smh my head |
-	//	\----------------------------------------------------------/
+	//	/---------------------------------------------------------\
+	//	|                      Character set                      |
+	//	| duck users and their need to control stuff, smh my head |
+	//	\---------------------------------------------------------/
 	char* charset;
 	u16 char_amount = 0;
 	char input = 0;
-	std::cout << "choose a charset:\n - [0]: Custom\n - [1]: [^:.-=+\'\"@\\/]\n - [2]: [*~,#]\n";
+	std::cout << " choose a charset:\n  - [0]: Custom\n  - [1]: [^:.-=+\'\"@\\/]\n  - [2]: [*~,#]\n";
 ccs:
 	input = getchar();
 	switch (input) {
@@ -171,7 +200,7 @@ ccs:
 		break;
 	}
 	}
-	std::cout << "\nusing charset: [" << charset << "] | length: " << char_amount << '\n';
+	std::cout << "\n using charset: [" << charset << "] | length: " << char_amount << '\n';
 
 
 	//	/------------\
@@ -221,7 +250,7 @@ ccs:
 	std::cout << " | file | written |\n ------------------\n";
 
 	//	/----------------------------------------------\
-	//	| Be a responsable dev and recycle your memory |
+	//	| Be a responsible dev and recycle your memory |
 	//	\----------------------------------------------/
 	cudaFree(dev_image);
 	cudaFree(dev_out);
