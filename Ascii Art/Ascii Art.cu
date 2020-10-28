@@ -170,13 +170,13 @@ int main() {
 	char* charset;
 	u16 char_amount = 0;
 	char input = 0;
-	std::cout << " choose a charset:\n  - [0]: Custom\n  - [1]: [^:.-=+\'\"@\\/]\n  - [2]: [*~,#]\n";
+	std::cout << " choose a charset:\n  - [0]: Custom\n  - [1]: [^:.-=+\'\"@\\/ ]\n  - [2]: [*~,#]\n";
 ccs:
 	input = getchar();
 	switch (input) {
 	case '1': {
-		charset = "^:.-=+'\"@\\/";
-		char_amount = 11;
+		charset = "^:.-=+'\"@\\/ ";
+		char_amount = 12;
 		break;
 	}
 	case '2': {
@@ -202,6 +202,13 @@ ccs:
 	}
 	std::cout << "\n using charset: [" << charset << "] | length: " << char_amount << '\n';
 
+	// /-----------------\
+	// | size correction |
+	// \-----------------/
+
+	bool size_correction;
+	std::cout << "\n\n size correction mode: [0]sample every other line [1]insert spaces: ";
+	std::cin >> size_correction;
 
 	//	/------------\
 	//	| Cuda Stuff |
@@ -236,11 +243,12 @@ ccs:
 	std::ofstream file_out("out.txt", std::ios::out);
 	std::string tmp;
 
-	for (u64 i = 0; i < height * width; i++) {
+	for (u64 i = 0; i < height * width; i+=1) {
 		tmp += host_out[i];
-		tmp += ' ';
+		if (size_correction) tmp += ' ';
 		if ((i + 1) % width == 0) {
 			tmp += '\n';
+			if(!size_correction) i += width;
 		}
 	}
 
